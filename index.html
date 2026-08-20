@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rahul M — Frontend Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+  /* ============ DESIGN TOKENS (CSS3 custom properties, dynamic theme) ============ */
+  :root{
+    --grid-unit: 8px;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --ease: cubic-bezier(.4,0,.2,1);
+    --max-w: 1180px;
+  }
+
+  [data-theme="light"]{
+    --bg: #F5F3EE;
+    --bg-raised: #FFFFFF;
+    --ink: #14181C;
+    --ink-soft: #4B5158;
+    --ink-faint: #8A8F96;
+    --line: #D9D5CB;
+    --accent: #2E4CDB;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #E7EAFB;
+    --grid-line: rgba(20,24,28,0.06);
+    --shadow: 0 12px 32px -12px rgba(20,24,28,0.16);
+  }
+
+  [data-theme="dark"]{
+    --bg: #0E1116;
+    --bg-raised: #171B22;
+    --ink: #EDEFF2;
+    --ink-soft: #A6ACB6;
+    --ink-faint: #676E78;
+    --line: #262B33;
+    --accent: #7C93FF;
+    --accent-ink: #0E1116;
+    --accent-soft: #1E2440;
+    --grid-line: rgba(237,239,242,0.06);
+    --shadow: 0 12px 32px -12px rgba(0,0,0,0.5);
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.55;
+    transition: background .35s var(--ease), color .35s var(--ease);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  h1,h2,h3{ font-family: var(--font-display); margin: 0; letter-spacing: -0.02em; }
+  p{ margin: 0; }
+  a{ color: inherit; text-decoration: none; }
+  ul{ list-style: none; margin:0; padding:0; }
+  img{ max-width:100%; display:block; }
+
+  .mono{ font-family: var(--font-mono); }
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .wrap{
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ============ NAV (Flexbox) ============ */
+  header.site-nav{
+    position: sticky; top:0; z-index: 50;
+    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    max-width: var(--max-w);
+    margin: 0 auto;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family: var(--font-mono); font-weight:500; font-size: 0.95rem;
+  }
+  .logo .dot{
+    width:10px; height:10px; border-radius:50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  nav.links{
+    display:flex; align-items:center; gap: 28px;
+  }
+  nav.links a{
+    font-size: 0.88rem; color: var(--ink-soft);
+    transition: color .2s var(--ease);
+  }
+  nav.links a:hover, nav.links a:focus-visible{ color: var(--accent); }
+
+  .theme-toggle{
+    display:flex; align-items:center;
+    width: 52px; height: 28px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    padding: 3px;
+    cursor: pointer;
+    position: relative;
+  }
+  .theme-toggle .knob{
+    width: 20px; height: 20px; border-radius:50%;
+    background: var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 11px;
+    transition: transform .3s var(--ease);
+    transform: translateX(0);
+    color: var(--accent-ink);
+  }
+  [data-theme="dark"] .theme-toggle .knob{ transform: translateX(24px); }
+  .theme-toggle:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .nav-toggle{
+    display:none;
+    width: 40px; height: 40px;
+    align-items:center; justify-content:center;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    cursor:pointer;
+  }
+  .nav-toggle span, .nav-toggle span::before, .nav-toggle span::after{
+    content:''; display:block; width:18px; height:2px; background: var(--ink);
+    position:relative; transition: all .2s var(--ease);
+  }
+  .nav-toggle span::before{ position:absolute; top:-6px; }
+  .nav-toggle span::after{ position:absolute; top:6px; }
+
+  /* ============ HERO — CSS Grid two-column ============ */
+  .hero{
+    display:grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 48px;
+    align-items:center;
+    padding: 72px 0 88px;
+  }
+  .hero h1{
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    line-height: 1.05;
+    margin: 14px 0 20px;
+  }
+  .hero h1 .accent{ color: var(--accent); }
+  .hero p.lead{
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 46ch;
+    margin-bottom: 28px;
+  }
+  .hero-cta{ display:flex; gap:14px; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 12px 22px;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem; font-weight:500;
+    border: 1px solid transparent;
+    cursor:pointer;
+    transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+  }
+  .btn:hover{ transform: translateY(-2px); }
+  .btn-primary{ background: var(--accent); color: var(--accent-ink); }
+  .btn-ghost{ border-color: var(--line); background: var(--bg-raised); color: var(--ink); }
+
+  .hero-card{
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .hero-card .stat{
+    display:flex; flex-direction:column; gap:4px;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    border: 1px solid var(--line);
+  }
+  .hero-card .stat b{ font-family: var(--font-display); font-size:1.6rem; }
+  .hero-card .stat span{ font-size: 0.78rem; color: var(--ink-faint); }
+
+  section{ padding: 64px 0; border-top: 1px solid var(--line); }
+  .section-head{ margin-bottom: 40px; max-width: 60ch; }
+  .section-head h2{ font-size: clamp(1.6rem, 3vw, 2.4rem); margin-top: 10px; }
+  .section-head p{ color: var(--ink-soft); margin-top: 12px; }
+
+  /* ============ PROJECTS — CSS Grid bento layout ============ */
+  .project-grid{
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+  }
+  .project-card{
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 26px;
+    display:flex; flex-direction:column; gap: 14px;
+    transition: border-color .2s var(--ease), transform .2s var(--ease);
+  }
+  .project-card:hover{ border-color: var(--accent); transform: translateY(-3px); }
+  .project-card.span-4{ grid-column: span 4; }
+  .project-card.span-2{ grid-column: span 2; }
+  .project-card.span-3{ grid-column: span 3; }
+  .project-card .tag-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .project-card .tag{
+    font-family: var(--font-mono); font-size: 0.7rem;
+    padding: 4px 9px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .project-card h3{ font-size: 1.25rem; }
+  .project-card p{ color: var(--ink-soft); font-size: 0.92rem; flex:1; }
+  .project-card .link-row{ display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--accent); }
+  .project-card .ask{
+    font-size: 0.86rem; color: var(--ink);
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 10px 12px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .project-card .ask b{ color: var(--accent); font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: .06em; display:block; margin-bottom: 4px; }
+  .project-card details{ margin-top: auto; }
+  .project-card summary{
+    cursor: pointer; list-style:none;
+    display:inline-flex; align-items:center; gap:6px;
+    font-family: var(--font-mono); font-size: 0.78rem;
+    color: var(--accent);
+    padding: 6px 0;
+    user-select:none;
+  }
+  .project-card summary::-webkit-details-marker{ display:none; }
+  .project-card summary::before{ content:'▸'; transition: transform .2s var(--ease); }
+  .project-card details[open] summary::before{ transform: rotate(90deg); }
+  .project-card pre{
+    margin: 8px 0 0;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .project-card pre code .k{ color: var(--accent); }
+  .project-card pre code .s{ color: #8FA84C; }
+  [data-theme="dark"] .project-card pre code .s{ color: #9FCB6B; }
+
+  /* ============ SKILLS — Flexbox wrap ============ */
+  .skills-flex{ display:flex; flex-wrap:wrap; gap: 12px; }
+  .skill-pill{
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg-raised);
+    font-size: 0.88rem;
+  }
+  .skill-pill .bar{
+    width: 40px; height: 5px; border-radius: 999px;
+    background: var(--line); overflow:hidden;
+  }
+  .skill-pill .bar i{ display:block; height:100%; background: var(--accent); }
+
+  /* ============ ABOUT — grid with sidebar ============ */
+  .about-grid{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    gap: 48px;
+  }
+  .about-meta{ display:flex; flex-direction:column; gap:18px; }
+  .about-meta .row{ display:flex; flex-direction:column; gap:2px; }
+  .about-meta .row span.k{ font-family: var(--font-mono); font-size:0.7rem; color: var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; }
+  .about-meta .row span.v{ font-size:0.92rem; }
+  .about-body p{ color: var(--ink-soft); margin-bottom:16px; max-width: 62ch; }
+  .about-body p:last-child{ margin-bottom:0; }
+
+  /* ============ CONTACT — Flexbox ============ */
+  .contact-flex{
+    display:flex; justify-content:space-between; align-items:flex-end; gap: 32px; flex-wrap:wrap;
+  }
+  .contact-flex h2{ font-size: clamp(1.8rem, 4vw, 3rem); max-width: 14ch; }
+  .contact-links{ display:flex; flex-direction:column; gap:10px; }
+  .contact-links a{
+    font-family: var(--font-mono); font-size: 0.95rem;
+    display:flex; align-items:center; gap:10px;
+    color: var(--ink-soft);
+  }
+  .contact-links a:hover{ color: var(--accent); }
+
+  footer{
+    border-top: 1px solid var(--line);
+    padding: 26px 0;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  footer p{ font-size: 0.8rem; color: var(--ink-faint); font-family: var(--font-mono); }
+
+  /* ============ MOBILE-FIRST MEDIA QUERIES ============ */
+  /* Base styles above already target the smallest screens conceptually via
+     flexible units; below we progressively enhance for wider viewports. */
+
+  @media (max-width: 900px){
+    .hero{ grid-template-columns: 1fr; gap: 36px; padding: 48px 0 56px; }
+    .hero-card{ grid-template-columns: repeat(2,1fr); }
+    .about-grid{ grid-template-columns: 1fr; gap: 24px; }
+    .project-grid{ grid-template-columns: repeat(2,1fr); }
+    .project-card.span-4, .project-card.span-3, .project-card.span-2{ grid-column: span 2; }
+    nav.links{
+      position: fixed; inset: 64px 16px auto 16px;
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      flex-direction: column; align-items: flex-start;
+      padding: 18px;
+      gap: 14px;
+      box-shadow: var(--shadow);
+      transform-origin: top right;
+      transform: scale(0.96);
+      opacity: 0;
+      pointer-events: none;
+      transition: all .2s var(--ease);
+    }
+    nav.links.open{ opacity:1; transform:scale(1); pointer-events:auto; }
+    .nav-toggle{ display:flex; }
+  }
+
+  @media (max-width: 560px){
+    .wrap{ padding: 0 16px; }
+    .hero-card{ grid-template-columns: 1fr; padding: 20px; }
+    .project-grid{ grid-template-columns: 1fr; }
+    .project-card.span-4, .project-card.span-3, .project-card.span-2{ grid-column: span 1; }
+    section{ padding: 44px 0; }
+    .contact-flex{ align-items: flex-start; }
+    .about-meta{ flex-direction: row; flex-wrap:wrap; }
+  }
+
+  @media (min-width: 1400px){
+    .wrap{ max-width: 1320px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; scroll-behavior: auto !important; }
+  }
+
+  :focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <div class="nav-inner">
+    <a class="logo" href="#top"><span class="dot"></span>rahulm.dev</a>
+    <nav class="links" id="navLinks">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="knob" id="knobIcon">☀</span>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <section class="hero" style="border-top:none;">
+    <div>
+      <p class="eyebrow">Frontend Engineer / Bengaluru</p>
+      <h1>Building interfaces that hold up on <span class="accent">every</span> screen.</h1>
+      <p class="lead">I design and build responsive, accessible web products — from semantic markup to production-grade CSS architecture. Currently freelancing for early-stage teams.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#work">View projects</a>
+        <a class="btn btn-ghost" href="#contact">Get in touch</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="stat"><b>38</b><span>Projects shipped</span></div>
+      <div class="stat"><b>6</b><span>Years experience</span></div>
+      <div class="stat"><b>100%</b><span>Lighthouse a11y avg.</span></div>
+      <div class="stat"><b>12</b><span>Clients across 4 countries</span></div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="section-head">
+      <p class="eyebrow">Selected work</p>
+      <h2>A few things I've shipped</h2>
+      <p>Each project pairs a real interface problem with a deliberate layout system — grid where structure matters, flexbox where alignment does.</p>
+    </div>
+    <div class="project-grid">
+
+      <article class="project-card span-4">
+        <div class="tag-row"><span class="tag">CSS Grid</span><span class="tag">Design System</span></div>
+        <h3>Northbeam — Analytics Dashboard</h3>
+        <p class="ask"><b>What they needed</b>A dashboard where widgets of different sizes could be rearranged by users without the grid breaking or leaving gaps.</p>
+        <p>Built the layout on CSS Grid with named template areas, so each widget occupies a defined region and resizes independently while the row heights stay aligned.</p>
+        <details>
+          <summary>View code</summary>
+          <pre><code>.dashboard {
+  display: <span class="k">grid</span>;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-areas:
+    "kpi  kpi  kpi  chart chart chart"
+    "list list activity activity map map";
+  gap: 20px;
+}
+.widget-kpi   { grid-area: kpi; }
+.widget-chart { grid-area: chart; }
+.widget-map   { grid-area: map; min-height: 260px; }</code></pre>
+        </details>
+      </article>
+
+      <article class="project-card span-2">
+        <div class="tag-row"><span class="tag">Flexbox</span></div>
+        <h3>Loop Cards</h3>
+        <p class="ask"><b>What they needed</b>A card component that stayed aligned however much text or how many tags each card had.</p>
+        <p>Used a column flex container with a flexed body and a footer pinned to the bottom, so card heights match automatically in any grid.</p>
+        <details>
+          <summary>View code</summary>
+          <pre><code>.card {
+  display: <span class="k">flex</span>;
+  flex-direction: column;
+  height: 100%;
+}
+.card__body { flex: 1 1 auto; }
+.card__footer {
+  margin-top: <span class="k">auto</span>;
+  display: flex;
+  justify-content: space-between;
+}</code></pre>
+        </details>
+      </article>
+
+      <article class="project-card span-2">
+        <div class="tag-row"><span class="tag">Dark mode</span><span class="tag">Custom properties</span></div>
+        <h3>Theme Engine</h3>
+        <p class="ask"><b>What they needed</b>One light/dark toggle that could restyle three separate product lines without duplicating CSS.</p>
+        <p>Centralised every color, radius and shadow into CSS custom properties scoped to a data-theme attribute, swapped in a single line of JS.</p>
+        <details>
+          <summary>View code</summary>
+          <pre><code>[data-theme="dark"] {
+  --bg: #0E1116;
+  --ink: #EDEFF2;
+  --accent: #7C93FF;
+}
+btn.addEventListener(<span class="s">'click'</span>, () =&gt; {
+  const t = root.dataset.theme;
+  root.dataset.theme = t === <span class="s">'dark'</span> ? <span class="s">'light'</span> : <span class="s">'dark'</span>;
+});</code></pre>
+        </details>
+      </article>
+
+      <article class="project-card span-3">
+        <div class="tag-row"><span class="tag">Grid</span><span class="tag">Booking UI</span></div>
+        <h3>TableTime — Restaurant Booking Widget</h3>
+        <p class="ask"><b>What they needed</b>An embeddable slot-picker that showed a full week of availability without horizontal scrolling on mobile.</p>
+        <p>Rendered days as CSS Grid columns on desktop, then collapsed to a single scrollable column with sticky day headers below 560px.</p>
+        <details>
+          <summary>View code</summary>
+          <pre><code>.slots {
+  display: <span class="k">grid</span>;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+<span class="k">@media</span> (max-width: 560px) {
+  .slots { grid-template-columns: 1fr; }
+  .slots .day-head { position: <span class="k">sticky</span>; top: 0; }
+}</code></pre>
+        </details>
+      </article>
+
+      <article class="project-card span-3">
+        <div class="tag-row"><span class="tag">Responsive</span><span class="tag">Mobile-first</span></div>
+        <h3>Ferry &amp; Co — Commerce Site</h3>
+        <p class="ask"><b>What they needed</b>A legacy fixed-width storefront rebuilt to work on phones, since 60% of traffic was mobile and the old layout broke below 768px.</p>
+        <p>Rewrote the CSS mobile-first: base styles target a single column, with min-width media queries layering on the grid as screen space grows.</p>
+        <details>
+          <summary>View code</summary>
+          <pre><code>.product-grid {
+  display: <span class="k">grid</span>;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+<span class="k">@media</span> (min-width: 640px) {
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+}
+<span class="k">@media</span> (min-width: 1024px) {
+  .product-grid { grid-template-columns: repeat(4, 1fr); }
+}</code></pre>
+        </details>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="section-head">
+      <p class="eyebrow">About</p>
+      <h2>How I work</h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-meta">
+        <div class="row"><span class="k">Based in</span><span class="v">Bengaluru, IN</span></div>
+        <div class="row"><span class="k">Focus</span><span class="v">CSS architecture, a11y</span></div>
+        <div class="row"><span class="k">Available</span><span class="v">Sep 2026</span></div>
+      </div>
+      <div class="about-body">
+        <p>I spend most of my time in the layer between design and markup — turning semantic HTML into interfaces that adapt cleanly across devices without duplicating logic in JavaScript.</p>
+        <p>My default toolkit leans on CSS Grid for page-level structure, Flexbox for component-level alignment, and a small set of custom properties that carry both spacing and theme so a single toggle can restyle an entire product.</p>
+        <p>Outside client work, I write about layout systems and mentor early-career developers moving from framework-first thinking back to the platform.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="section-head">
+      <p class="eyebrow">Skills</p>
+      <h2>What I reach for</h2>
+    </div>
+    <div class="skills-flex">
+      <span class="skill-pill">CSS Grid <span class="bar"><i style="width:95%"></i></span></span>
+      <span class="skill-pill">Flexbox <span class="bar"><i style="width:95%"></i></span></span>
+      <span class="skill-pill">Custom Properties <span class="bar"><i style="width:90%"></i></span></span>
+      <span class="skill-pill">Semantic HTML <span class="bar"><i style="width:92%"></i></span></span>
+      <span class="skill-pill">Accessibility <span class="bar"><i style="width:85%"></i></span></span>
+      <span class="skill-pill">Animation &amp; Motion <span class="bar"><i style="width:70%"></i></span></span>
+      <span class="skill-pill">JavaScript (DOM) <span class="bar"><i style="width:75%"></i></span></span>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="contact-flex">
+      <h2>Let's build something responsive together.</h2>
+      <div class="contact-links">
+        <a href="mailto:hello@rahulm.dev">hello@rahulm.dev</a>
+        <a href="https://github.com/rahul2006-tech" target="_blank" rel="noopener noreferrer">github.com/rahul2006-tech</a>
+        <a href="https://www.linkedin.com/in/rahul-m-616196358" target="_blank" rel="noopener noreferrer">linkedin.com/in/rahul-m-616196358</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p>© 2026 Rahul M — built with CSS Grid, Flexbox &amp; custom properties.</p>
+  <p id="themeLabel">Theme: Light</p>
+</footer>
+
+<script>
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const knob = document.getElementById('knobIcon');
+  const label = document.getElementById('themeLabel');
+
+  function setTheme(mode){
+    root.setAttribute('data-theme', mode);
+    knob.textContent = mode === 'dark' ? '☾' : '☀';
+    label.textContent = 'Theme: ' + (mode === 'dark' ? 'Dark' : 'Light');
+  }
+
+  toggle.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme');
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  });
+
+  // Respect system preference on first load (in-memory only, no storage APIs)
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    setTheme('dark');
+  }
+
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+</script>
+
+</body>
+</html>
